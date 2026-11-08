@@ -1,20 +1,42 @@
-# 每日一极，每日一积
+# DailyCalculas
 
-Buildless static site. Self-hosted KaTeX. Serve `dist/` over HTTP.
+一个简洁的每日微积分练习网页，每天提供一道极限题和一道积分题，点击题目公式即可查看中文过程解析。
 
-The home page displays one limit and one integral for the current Asia/Shanghai calendar date. Eight mathematical structures per category rotate daily with changing integer parameters. Problems are generated deterministically; the finite parameter cycle eventually repeats, and no external AI or scheduling service is needed. Midnight, visibility, and page restore refresh the home page. Answer URLs retain their problem date.
+## 功能
 
-Run `node verify.cjs` to check all parameterized formulas and dates. Vendored KaTeX assets are copied from the pinned npm package; include its license.
+- 使用 KaTeX 渲染 LaTeX 公式，相关脚本、样式和字体均随项目提供。
+- 按北京时间每天零点切换题目；重新显示页面时也会检查日期并更新。
+- 极限与积分各包含 8 种题型，通过题型轮换和整数参数变化生成每日题目，完整组合每 88 天循环。
+- 答案链接保留题目日期，跨日后仍可查看对应题目的解析。
+- 无需外部 AI 服务或定时任务；当前不会自动生成全新题型。
 
-## GitLab CI
+## 本地预览
 
-The repository includes `.gitlab-ci.yml`, which replaces the default Auto DevOps pipeline. Each pipeline uses Node.js 22, installs the locked dependencies with `npm ci`, and runs `npm test`. Checks cover application syntax, LaTeX rendering, Chinese explanation coverage, and daily question changes. Successful jobs attach `dist/` as a downloadable artifact for one week.
+项目是无需构建的静态网站，网页文件位于 `dist/` 目录。安装 Python 后，可在项目根目录运行：
 
-To run the same checks locally:
+```sh
+python -m http.server 4173 --directory dist
+```
+
+然后在浏览器中打开 <http://localhost:4173>。
+
+## 本地检查
+
+安装 Node.js 后，在项目根目录运行：
 
 ```sh
 npm ci --no-audit --no-fund
 npm test
 ```
 
-This pipeline validates the static website and does not publish to GitLab Pages or change the existing Sites deployment. It requires a GitLab runner able to pull `node:22-alpine` and install packages from the npm registry.
+检查内容包括网页脚本语法、LaTeX 公式渲染、中文解析是否齐全，以及每日题目切换。这些检查不能代替对数学答案正确性的审核。
+
+KaTeX 使用固定版本的 npm 依赖。`dist/vendor/` 中的资源来自该依赖包，并保留其许可证。
+
+## GitLab 自动流水线
+
+仓库中的 `.gitlab-ci.yml` 使用自定义检查流程，替代默认的 Auto DevOps 流水线。每次触发流水线后，会使用 Node.js 22 安装锁定版本的依赖并运行 `npm test`。检查通过后，`dist/` 目录会作为可下载的作业产物保存一周。
+
+运行流水线需要 GitLab Runner 能够拉取 `node:22-alpine` 镜像，并访问 npm 软件包仓库。
+
+当前流水线只负责检查与保存网页文件，不会自动出新题、发布到 GitLab Pages，或更新已有的 Sites 网站。
