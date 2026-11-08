@@ -1,0 +1,16 @@
+# This static site needs validation, not Auto DevOps container builds.
+image: node:22-alpine
+
+stages:
+  - test
+
+verify_site:
+  stage: test
+  script:
+    - npm ci --no-audit --no-fund
+    - npm test
+  artifacts:
+    when: on_success
+    paths:
+      - dist/
+    expire_in: 1 week

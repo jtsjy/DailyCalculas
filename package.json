@@ -1,4 +1,8 @@
 {
+  "private": true,
+  "scripts": {
+    "test": "node --check dist/app.js && node verify.cjs"
+  },
   "dependencies": {
     "katex": "0.16.22"
   }
