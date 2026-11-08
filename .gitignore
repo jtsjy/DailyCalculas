@@ -2,3 +2,4 @@ node_modules/
 .sites/
 *.tar.gz
 outputs/
+.openai/
