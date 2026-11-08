@@ -2,6 +2,7 @@ const app=document.getElementById('app');
 const title='Everyday Calculas Exercise';
 function today(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
 let lastDay=today();
+function formatDate(date){const [,month,day]=date.split('-').map(Number);const suffix=day%100>=11&&day%100<=13?'th':({1:'st',2:'nd',3:'rd'}[day%10]||'th');const months=['Jan.','Feb.','Mar.','Apr.','May','Jun.','Jul.','Aug.','Sep.','Oct.','Nov.','Dec.'];return `${day}${suffix} ${months[month-1]}`;}
 function math(tex){const el=document.createElement('div');el.className='formula';katex.render(tex,el,{displayMode:true,throwOnError:true,output:'htmlAndMathml',strict:'error'});return el;}
 function fit(){document.querySelectorAll('.formula').forEach(el=>{el.style.fontSize='';const target=el.querySelector('.katex');if(!target)return;const desired=parseFloat(getComputedStyle(el).fontSize);const width=target.getBoundingClientRect().width;const available=el.clientWidth-4;if(width>available)el.style.fontSize=Math.max(14,desired*available/width)+'px';});}
 function render(){
@@ -11,7 +12,7 @@ function render(){
  const date=isAnswer&&/^\d{4}-\d{2}-\d{2}$/.test(raw||'')&&!isNaN(Date.parse(raw+'T00:00:00+08:00'))?raw:today();
  const [limit,integral]=getProblems(date);
  app.className=isAnswer?'answer':'';
- app.innerHTML=`<header><a class="site-name" href="/">${title}</a></header><div class="hero"><h1>${title}</h1></div>`;
+ app.innerHTML=`<header><h1>${title}</h1></header>`;
  if(!isAnswer){
   [limit,integral].forEach((p,i)=>{
    const section=document.createElement('section');section.className='problem';
@@ -25,8 +26,11 @@ function render(){
   const steps=document.createElement('div');steps.className='steps';
   p.s.forEach((s,i)=>{const row=document.createElement('section');row.className='step';const content=document.createElement('div');content.className='step-content';const note=document.createElement('p');note.className='explanation';note.textContent=p.notes[i];content.append(note,math(s));row.append(content);steps.append(row);});
   app.append(steps);
-  const footer=document.createElement('footer');footer.className='footer';const back=document.createElement('a');back.className='back';back.href='/';back.textContent='← 返回题目';const tip=document.createElement('span');tip.textContent=p.tip;footer.append(back,tip);app.append(footer);
+  const tip=document.createElement('p');tip.className='tip';tip.textContent=p.tip;app.append(tip);
  }
+ const footer=document.createElement('footer');footer.className='footer';
+ if(isAnswer){const back=document.createElement('a');back.className='back';back.href='/';back.textContent='Back';footer.append(back);}
+ const dateLabel=document.createElement('time');dateLabel.className='date';dateLabel.dateTime=date;dateLabel.textContent=formatDate(date);footer.append(dateLabel);app.append(footer);
  document.title=title;requestAnimationFrame(fit);
 }
  document.fonts.ready.then(fit);window.addEventListener('resize',fit);window.addEventListener('pageshow',()=>{if(today()!==lastDay){lastDay=today();render();}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&today()!==lastDay){lastDay=today();render();}});setInterval(()=>{if(today()!==lastDay){lastDay=today();if(!new URLSearchParams(location.search).has('answer'))render();}},1000);render();
