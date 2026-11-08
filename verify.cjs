@@ -6,6 +6,9 @@ for(const factory of [...limits,...integrals])for(let a=2;a<=12;a++){
   const p=factory(a);
   assert.equal(p.notes.length,p.s.length);
   assert(p.notes.every(note=>typeof note==='string'&&note.length>0));
+  for(const note of [...p.notes,p.tip]){
+    for(const match of note.matchAll(/\\\((.*?)\\\)|\$([^$]+)\$/g))katex.renderToString(match[1]||match[2],{displayMode:false,throwOnError:true});
+  }
   for(const tex of [p.q,...p.s]){katex.renderToString(tex,{displayMode:true,throwOnError:true,strict:'error'});count++;}
 }
 let previous;

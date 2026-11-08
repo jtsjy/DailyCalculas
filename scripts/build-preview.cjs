@@ -8,8 +8,14 @@ const katexCSS=read('vendor/katex.min.css').replace(/src:url\(([^)]+\.woff2)\)[^
   return `src:url(data:font/woff2;base64,${bytes.toString('base64')}) format("woff2")`;
 });
 let html=read('index.html');
+const licenses=['vendor/LICENSE','vendor/LICENSE-octicons.txt','fonts/OFL-NotoSerifSC.txt'].map(file=>read(file).replace(/--/g,'- -')).join('\n\n');
+html=html.replace('<!doctype html>',()=>`<!doctype html>\n<!-- Bundled font and math library licenses:\n${licenses}\n-->`);
 html=html.replace(/<link rel="stylesheet" href="\.\/vendor\/katex.min.css">/,()=>`<style>${katexCSS}</style>`);
-html=html.replace(/<link rel="stylesheet" href="\.\/style.css">/,()=>`<style>${read('style.css')}</style>`);
+const siteCSS=read('style.css').replace(/url\(["']?(\.\/fonts\/[^)'" ]+\.woff2)["']?\)/g,(_,font)=>{
+  const bytes=fs.readFileSync(path.join(root,'dist',font));
+  return `url(data:font/woff2;base64,${bytes.toString('base64')})`;
+});
+html=html.replace(/<link rel="stylesheet" href="\.\/style.css">/,()=>`<style>${siteCSS}</style>`);
 // Inline scripts must run after #app exists, including when opened directly.
 const scripts=[];
 html=html.replace(/<script defer src="\.\/([^"]+)"><\/script>/g,(_,file)=>{
