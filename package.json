@@ -1,7 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "test": "node --check dist/app.js && node verify.cjs"
+    "build:preview": "node scripts/build-preview.cjs",
+    "test": "node --check dist/app.js && node verify.cjs && node scripts/build-preview.cjs --check && node verify-preview.cjs"
   },
   "dependencies": {
     "katex": "0.16.22"

@@ -6,7 +6,7 @@ function formatDate(date){const [,month,day]=date.split('-').map(Number);const s
 function math(tex){const el=document.createElement('div');el.className='formula';katex.render(tex,el,{displayMode:true,throwOnError:true,output:'htmlAndMathml',strict:'error'});return el;}
 function fit(){document.querySelectorAll('.formula').forEach(el=>{el.style.fontSize='';const target=el.querySelector('.katex');if(!target)return;const desired=parseFloat(getComputedStyle(el).fontSize);const width=target.getBoundingClientRect().width;const available=el.clientWidth-4;if(width>available)el.style.fontSize=Math.max(14,desired*available/width)+'px';});}
 function render(){
- const params=new URLSearchParams(location.search);
+ const params=dailyRoutes.params(location.search,location.hash);
  const isAnswer=params.get('answer')==='limit'||params.get('answer')==='integral';
  const raw=params.get('date');
  const date=isAnswer&&/^\d{4}-\d{2}-\d{2}$/.test(raw||'')&&!isNaN(Date.parse(raw+'T00:00:00+08:00'))?raw:today();
@@ -16,7 +16,7 @@ function render(){
  if(!isAnswer){
   [limit,integral].forEach((p,i)=>{
    const section=document.createElement('section');section.className='problem';
-   const link=document.createElement('a');link.className='formula-link';link.href=`?answer=${i?'integral':'limit'}&date=${date}`;
+   const link=document.createElement('a');link.className='formula-link';link.href=dailyRoutes.href(location.href,i?'integral':'limit',date);
    link.setAttribute('aria-label',`查看${i?'积分':'极限'}的中文解析`);
    link.append(math(p.q));link.insertAdjacentHTML('beforeend','<span class="arrow" aria-hidden="true">↗</span>');section.append(link);app.append(section);
   });
@@ -29,8 +29,8 @@ function render(){
   const tip=document.createElement('p');tip.className='tip';tip.textContent=p.tip;app.append(tip);
  }
  const footer=document.createElement('footer');footer.className='footer';
- if(isAnswer){const back=document.createElement('a');back.className='back';back.href='/';back.textContent='Back';footer.append(back);}
+ if(isAnswer){const back=document.createElement('a');back.className='back';back.href=dailyRoutes.href(location.href);back.textContent='Back';footer.append(back);}
  const dateLabel=document.createElement('time');dateLabel.className='date';dateLabel.dateTime=date;dateLabel.textContent=formatDate(date);footer.append(dateLabel);app.append(footer);
  document.title=title;requestAnimationFrame(fit);
 }
- document.fonts.ready.then(fit);window.addEventListener('resize',fit);window.addEventListener('pageshow',()=>{if(today()!==lastDay){lastDay=today();render();}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&today()!==lastDay){lastDay=today();render();}});setInterval(()=>{if(today()!==lastDay){lastDay=today();if(!new URLSearchParams(location.search).has('answer'))render();}},1000);render();
+ document.fonts.ready.then(fit);window.addEventListener('hashchange',render);window.addEventListener('resize',fit);window.addEventListener('pageshow',()=>{if(today()!==lastDay){lastDay=today();render();}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&today()!==lastDay){lastDay=today();render();}});setInterval(()=>{if(today()!==lastDay){lastDay=today();if(!dailyRoutes.params(location.search,location.hash).has('answer'))render();}},1000);render();
